@@ -1,0 +1,88 @@
+body {
+	
+	text-align: center;
+	
+}
+
+
+.container {
+	background-color: #ccebff;
+	
+}
+.top-form {
+	background-color: #008ae6;
+	border-radius: 3px;
+	border:  solid black;
+	border-width: 0px 1px 1px 0px;
+	padding: 10px 6px 10px 6px;
+	margin: 8px 0px 8px 0px;
+}
+
+
+
+.jumbotron {
+
+	background-color: #006bb3;
+	color: #FFFFFF;
+	min-height: 180px;
+	margin-bottom: 0px;
+}
+
+.input-group {
+	width: 12%;
+	
+}
+
+
+.minus-a {
+	width: 9%;
+	
+}
+.minus-b {
+	width: 10%;
+	
+}
+
+.plus-a {
+	width: 16%;
+}
+
+.input-group-addon {
+	
+	border-color: black;
+}
+
+.form-group {
+	padding: 0px;
+}
+
+.form-control {
+	border-color: black;
+	border-radius: 1px;
+}
+
+.in-the-red {
+	color: red;
+}
+
+.total-line {
+	border-top: 1px solid black override;
+}
+
+.colA {
+	width: 10%;
+}
+
+.colB {
+	width: 18%;
+}
+
+.colR {
+	width: 12%;
+}
+
+.colBalance {
+	text-align:right;
+	padding-right: 100px;
+}
+

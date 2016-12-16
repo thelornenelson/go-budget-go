@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="budgetApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Budget-a-go-go</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="budgetappCSS/css/bootstrap.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="cover.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="assets/js/ie-emulation-modes-warning.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+	<script src="ui-bootstrap-tpls-1.1.2.min.js"></script>
+	<script src="angular-animate.min.js"></script>
+	<script src="budgetapp.js"></script>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body ng-controller="budgetAppCtrl">
+		<div class="jumbotron">
+			<h1>By and By</h1>
+		</div>
+
+	  <div class="container">
+			<div class="row">
+				<div class="col-xs-12">
+					<p>Length: {{transactionSeriesList.length}}</p>
+					<p ng-repeat="checksum in transactionSeriesListChecksums track by $index">{{ checksum[0] }} : {{ checksum[1] }}</p>
+
+				</div>
+			</div>
+
+
+
+				<div class="row top-form" ng-repeat="transactionSeries in transactionSeriesList track by $index">
+
+					<form role="form" class="form-inline">
+					<div class="form-group col-xs-12 ">
+
+							<label class="sr-only" for="InputDescription">Input Description</label>
+							<div class="input-group input-group-sm plus-a">
+								<input type="text" class="form-control" id="InputDescription" ng-model="transactionSeries.description" placeholder="Description">
+							</div>
+
+							<label class="sr-only" for="InputAmount">Input Amount</label>
+							<div class="input-group input-group-sm minus-a">
+								<div class="input-group-addon">$</div>
+								<input type="text" class="form-control" id="InputAmount"  ng-model="transactionSeries.amount" placeholder="Amount">
+							</div>
+
+							<label class="sr-only" for="InputAccountFrom">Select Account</label>
+							<div class="input-group input-group-sm minus-a">
+								<select class="form-control" id="InputAccountFrom" ng-model="transactionSeries.account">
+								  <option>Chequing</option>
+								  <option>Savings</option>
+								  <option>TFSA</option>
+								  <option>RRSP</option>
+								</select>
+							</div>
+
+							<label class="sr-only" for="InputAccountTo">Select Account to Transfer to</label>
+							<div class="input-group input-group-sm plus-a">
+								<div class="input-group-addon">Transfer To</div>
+								<select class="form-control" id="InputAccountTo" ng-model="transactionSeries.transferAccount">
+								  <option>-</option>
+								  <option>Chequing</option>
+								  <option>Savings</option>
+								  <option>TFSA</option>
+								  <option>RRSP</option>
+								</select>
+							</div>
+
+
+
+							<label class="sr-only" for="InputStartDate">Input Start Date</label>
+							<div class="input-group input-group-sm">
+								<div class="input-group-addon">Start</div>
+								<input type="text" class="form-control" uib-datepicker-popup ng-model="transactionSeries.startDate" is-open="popupOpen[$index][0]" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" ng-click="open($index,0)"/>
+							</div>
+
+							<label class="sr-only" for="InputEndDate">Input End Date</label>
+							<div class="input-group input-group-sm">
+								<div class="input-group-addon">End</div>
+								<input type="text" class="form-control" uib-datepicker-popup ng-model="transactionSeries.endDate" is-open="popupOpen[$index][1]" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" ng-click="open($index,1)"/>
+							</div>
+
+
+
+							<label class="sr-only" for="InputRepeat">Repeats N often</label>
+							<div class="input-group input-group-sm minus-a">
+								<div class="input-group-addon">Every</div>
+								<input type="text" class="form-control" id="InputRepeat" ng-model="transactionSeries.frequency" placeholder="">
+
+							</div>
+
+							<label class="sr-only" for="InputFrequency">Select frequency to repeat</label>
+							<div class="input-group input-group-sm minus-a">
+								<select class="form-control" id="InputFrequency" ng-model="transactionSeries.frequencyType">
+									<option value="1" ng-pluralize count="transactionSeries.frequency||2" when="{'one': 'Day', 'other': 'Days'}"></option>
+									<option value="2" ng-pluralize count="transactionSeries.frequency||2" when="{'one': 'Week', 'other': 'Weeks'}"></option>
+									<option value="3" ng-pluralize count="transactionSeries.frequency||2" when="{'one': 'Month', 'other': 'Months'}"></option>
+									<option value="4" ng-pluralize count="transactionSeries.frequency||2" when="{'one': 'Year', 'other': 'Years'}"></option>
+								</select>
+							</div>
+							<a href=""><span class="glyphicon glyphicon-remove" ng-click="deleteTransactionSeries($index)"></span></a>
+						</div>
+					</form>
+				</div>
+
+			<div class="row">
+				<div class="cos-xd-1">
+				</div>
+				<div class="cos-xs-10">
+					<table class="table table-striped">
+						<tr>
+							<th>description</th>
+							<th>amount</th>
+							<th>account</th>
+							<th>transferAccount</th>
+							<th>startDate</th>
+							<th>endDate</th>
+							<th>frequency</th>
+							<th>frequencyType</th>
+
+						</tr>
+						<tr ng-repeat="transaction in transactionSeriesList">
+							<td>{{transaction.description}}</td>
+							<td>{{transaction.amount}}</td>
+							<td>{{transaction.account}}</td>
+							<td>{{transaction.transferAccount}}</td>
+							<td>{{transaction.startDate | date : 'yyyy-MM-dd'}}</td>
+							<td>{{transaction.endDate | date : 'yyyy-MM-dd'}}</td>
+							<td>{{transaction.frequency}}</td>
+							<td>{{transaction.frequencyType}}</td>
+
+
+						</tr>
+
+					</table>
+
+				</div>
+			</div>
+
+			<div class="row">
+
+				<div class="cos-xs-12">
+					<table class="table table-striped">
+						<tr>
+							<th>Date</th>
+							<th>Account</th>
+              <th>Amount</th>
+							<th>Balance</th>
+
+
+						</tr>
+						<tr ng-repeat="transaction in ledger">
+							<td>{{transaction[0] | date : 'yyyy-MM-dd'}}</td>
+							<td>{{transaction[1]}}</td>
+							<td>{{transaction[2]}}</td>
+              <td>{{transaction[3]}}</td>
+						</tr>
+
+					</table>
+
+				</div>
+			</div>
+
+			<div class="row">
+
+				<div class="cos-xs-12">
+				<br />
+					<table class="table table-striped">
+						<tr>
+							<th></th>
+							<th></th>
+							<th colspan=2>Account 1</th>
+							<th colspan=2>Account 2</th>
+							<th colspan=2>Account 3</th>
+						</tr>
+						<tr>
+							<td rowspan="1">2016-02-01</td>
+							<td></td>
+							<td></td>
+							<td class="colR colBalance">$0.00</td>
+							<td></td>
+							<td class="colR colBalance">$0.00</td>
+							<td></td>
+							<td class="colR colBalance">$0.00</td>
+						</tr>
+						<tr>
+							<td class="colA" >2016-03-01</td>
+							<td class="colB">Description</td>
+							<td class="colR">$1000.00</td>
+							<td class="colR colBalance"></td>
+							<td class="colR"></td>
+							<td class="colR colBalance"></td>
+							<td class="colR"></td>
+							<td class="colR colBalance"></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>Description</td>
+							<td></td>
+							<td></td>
+							<td class="in-the-red">($500.00)</td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>Transfer</td>
+							<td></td>
+							<td></td>
+							<td class="in-the-red">($500.00)</td>
+							<td></td>
+							<td>$500</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td class="total-line colBalance">$1000.00</td>
+							<td></td>
+							<td class="in-the-red total-line colBalance">($1000.00)</td>
+							<td></td>
+							<td class="total-line colBalance">$500.00</td>
+						</tr>
+
+					</table>
+
+				</div>
+			</div>
+
+
+      <div class="row">
+        <div class="col-xs-12">
+          <p>Length: {{transactionSeriesList.length}}</p>
+          <p ng-repeat="checksum in transactionSeriesListChecksums track by $index">{{ checksum[0] }} : {{ checksum[1] }}</p>
+
+        </div>
+      </div>
+
+
+		</div>
+		</div>
+
+
+	  <div class="jumbotron">
+
+		</div>
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="../../dist/js/bootstrap.min.js"></script> -->
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
