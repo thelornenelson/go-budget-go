@@ -171,11 +171,10 @@
 
 
 						</tr>
-						<tr ng-repeat="transaction in ledger">
-							<td>{{transaction[0] | date : 'yyyy-MM-dd'}}</td>
-							<td>{{transaction[1]}}</td>
-							<td>{{transaction[2]}}</td>
-              <td>{{transaction[3]}}</td>
+						<tr ng-repeat="day in ledger">
+							<td>{{day.date | date : 'yyyy-MM-dd'}}</td>
+							<td ng-repeat="transaction in day.transactions track by $index">{{transaction.description}}</td>
+
 						</tr>
 
 					</table>

@@ -104,19 +104,18 @@ $scope.popupOpen = [];
 
 
 
-$scope.ledger1 = ["test1", "test2", "test3"];
+
 $scope.transactionSeriesList = [];
 $scope.clicks = 0;
 
-$scope.testLedger = [1, 2, 3, 4]
 
-var chequing = new Account("Chequing",0);
+$scope.accounts = ["Chequing", "Savings", "TFSA", "RRSP"];
+var chequing = new ledger($scope.accounts);
 
 
 $scope.transactionSeriesList.push(new transactionSeries("Test Transaction 1", 50, "Chequing", "-", new Date(2015,00,01), new Date(2015,11,31), 4, "2"));
 $scope.transactionSeriesList.push(new transactionSeries("Test Transaction 2", 750, "Chequing", "-", new Date(2015,00,01), new Date(2015,11,31), 2, "3"));
-$scope.transactionSeriesList.push(new transactionSeries("Test Transaction 3", -100, "Chequing", "-", new Date(2015,00,01), new Date(2015,11,31), 2, "2"));
-//$scope.transactionSeriesList.push(new testObj());
+$scope.transactionSeriesList.push(new transactionSeries("Test Transaction 3", -100, "Chequing", "TFSA", new Date(2015,00,01), new Date(2015,11,31), 2, "2"));
 $scope.transactionSeriesListValid = [];
 $scope.transactionSeriesListChecksums = [];
 
@@ -124,12 +123,8 @@ $scope.transactionSeriesListChecksums = [];
 chequing.apply_transactions($scope.transactionSeriesList);
 
 
-$scope.ledger = chequing.return_ledger(); //right now this is just the chequing ledger but I need to combine all accounts into a single ledger
+$scope.ledger = chequing.return_ledger();
 
-/*
-$scope.lastTrans = $scope.transactionSeriesList[$scope.transactionSeriesList.length-1];
-$scope.transLength = 0;
-*/
 
 // output checksums for debugging
 for(var x = 0; x < $scope.transactionSeriesList.length; x++){
@@ -188,7 +183,7 @@ $scope.deleteTransactionSeries = function(index){
 }
 */
 /*
-transactionSeries decribes an item of income, expense, or transfer and characteristics of its repitition.
+transactionSeries decribes an item of income, expense, or transfer and characteristics of its repetition.
 description is a plain english name for the item, for example "rent" or "paycheque"
 amount is the dollar amount of the item
 account is the name of the account to which the item applies, or the source account for transfers
@@ -262,7 +257,7 @@ function transactionSeries(description, amount, account, transferAccount, startD
 
 	this.curr_transaction = function(){
 
-		return [new Date(this.currDate), this.account, Number(this.amount) ];
+		return [new Date(this.currDate), this.description, this.account, this.transferAccount, Number(this.amount) ];
 	};
 
 	this.isValidSeries = function(){
@@ -295,18 +290,42 @@ Account currently only handles a single accounts and is limited by the object's 
 Doesn't really make sense to have separate objects for each account as it seems to only complicate the interoperation of transactions.
 This should be rewritten to handle all accounts within a single object (a Ledger object).
 
-*/
-function Account(name, balance){
-	this.name = name;
-	this.balance = balance;
-	this.startBalance = balance;
-	this.ledger = []; //Ledger is a 2D array of Date | Amount | Account | Balance for all transactions in account
+TO DO:
 
+Change account object to a ledger object. Ledger will contain an array of objects. Each object will have properties date (date), endingBalance,
+ and transactions (array).
+transactions will be an array with length equal to the number of accounts. Each element of the array will be a further array of objects
+describing amount and description for each transaction.
+
+*/
+function ledger(accounts){
+
+  this.accounts = accounts;
+	this.ledgerData = {}; //ledgerData is an object with properties named [getTime()] corresponding to dates when account activity occurs.
+                        //XXXXX.transactions = [{description: blah, accounts: [account 1 change, account 2 change, ... , account n change]}, ...]
+                        //XXXXX.endBalance = [account 1 balance, account 2 balance, ..., account n balance]
+                        //XXXXX.date = JS date
 
 	this.transaction = function(transaction){
+    //transaction is an array of format [this.currDate, this.description, this.account, this.transferAccount, Number(this.amount)]
 
-		this.ledger.push(transaction);
+    var currentDay = transaction[0].getTime();
+
+		if(this.ledgerData[currentDay] === undefined) {
+      this.ledgerData[currentDay] = {};
+      this.ledgerData[currentDay].transactions = [];
+      this.ledgerData[currentDay].date = transaction[0];
+    }
+    this.ledgerData[currentDay].transactions.push({description: transaction[1], accounts: []});
+    var currentTransaction = this.ledgerData[currentDay].transactions.length - 1;
+    this.ledgerData[currentDay].transactions[currentTransaction].accounts.length = this.accounts.length;
+    this.ledgerData[currentDay].transactions[currentTransaction].accounts[this.accounts.indexOf(transaction[2])] = transaction[5];
+    if(transaction[3] != "-"){
+      this.ledgerData[currentDay].transactions[currentTransaction].accounts[this.accounts.indexOf(transaction[3])] = transaction[5] * -1;
+    }
 		console.log("pushing " + transaction + " to this.ledger");
+
+
 
 	};
 
@@ -331,35 +350,29 @@ function Account(name, balance){
 
 	this.return_ledger = function(){
 
-	return this.ledger;
+	return this.ledgerData;
 
 	};
 
 	this.apply_transactions = function(transactionSeriesList){
 
-			this.ledger.length = 0;
+			this.ledgerData = {};
 
 			for(x = 0; x < transactionSeriesList.length; x++){
 				if( transactionSeriesList[x].isValidSeries() ){
 					transactionSeriesList[x].resetSeries();
 					console.log("About to update transactions; Checksum = " + transactionSeriesList[x].checksum());
+          //while loop iterates through transaction series and
 					while(transactionSeriesList[x].currDate.getTime() < transactionSeriesList[x].endDate.getTime()){
 						this.transaction(transactionSeriesList[x].curr_transaction());
 						transactionSeriesList[x].next();
 						console.log("Looping through transaction series " + transactionSeriesList[x].description);
 					}
 
-					this.ledger.sort(function(a, b) {
-								a = new Date(a[0]);
-								b = new Date(b[0]);
-								return a>b ? 1 : a<b ? -1 : 0;
-						});
-          columns = this.ledger[0].length;
-					this.ledger[0][columns] = this.startBalance + this.ledger[0][columns - 1];
-					for(i = 1; i < this.ledger.length; i++){
-						this.ledger[i][columns] = this.ledger[i-1][columns - 1] + this.ledger[i][columns - 1];
 
-					};
+
+
+
 				}
 			};
 
